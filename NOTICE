@@ -1,0 +1,37 @@
+
+This product includes software from third party projects:
+
+
+----------------------------------------------------------------------------------------
+License: http://www.apache.org/licenses/LICENSE-2.0
+----------------------------------------------------------------------------------------
+http://xmlgraphics.apache.org/batik/
+https://github.com/FasterXML/jackson
+http://commons.apache.org/
+https://code.google.com/p/guava-libraries/
+http://hc.apache.org/
+http://jena.apache.org/
+https://github.com/spring-projects/spring-framework/tree/master/spring-webmvc
+https://github.com/twbs/bootstrap
+
+----------------------------------------------------------------------------------------
+License: http://www.opensource.org/licenses/mit-license.php
+----------------------------------------------------------------------------------------
+http://www.slf4j.org/
+http://jquery.com/
+
+
+----------------------------------------------------------------------------------------
+License: http://www.eclipse.org/legal/epl-v10.html
+----------------------------------------------------------------------------------------
+http://junit.org/
+
+
+
+
+
+
+
+
+
+
