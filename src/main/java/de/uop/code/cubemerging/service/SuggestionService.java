@@ -52,7 +52,7 @@ public class SuggestionService {
         return getScore(sd1, sd2, compareAlgorithm);
     }
 
-    public double getScore(StructureDefinition sd1, StructureDefinition sd2, CompareAlgorithm compareAlgorithm) {
+    private double getScore(StructureDefinition sd1, StructureDefinition sd2, CompareAlgorithm compareAlgorithm) {
         int equalDims = 0;
         int equalMeas = 0;
 
