@@ -27,28 +27,10 @@ public class BalloonService {
         if (uri1.equals(uri2)) {
             return true;
         } else {
-            BalloonSameAsResponse same1 = getCluster(uri1);
             BalloonSameAsResponse same2 = getCluster(uri2);
 
-            return isSameConcept(same1, same2);
+            return same2.getSameAs().contains(uri1);
         }
-    }
-
-    private boolean isSameConcept(BalloonSameAsResponse same1, BalloonSameAsResponse same2) {
-        boolean result = false;
-
-        if (same1.getSameAs() == null || same2.getSameAs() == null) {
-            return false;
-        }
-
-        for (String concept : same1.getSameAs()) {
-            if (same2.getSameAs().contains(concept)) {
-                result = true;
-                break;
-            }
-        }
-
-        return result;
     }
 
     private BalloonSameAsResponse getCluster(String uri) {
