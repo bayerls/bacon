@@ -38,7 +38,7 @@ public class Properties {
     }
 
     public String getStoreageServiceProvider() {
-        return config.getString("storeageServiceProvider");
+        return config.getString("storageServiceProvider");
     }
 
 
