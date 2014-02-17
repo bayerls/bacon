@@ -1,9 +1,7 @@
 package de.uop.code.cubemerging.service;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
@@ -30,11 +28,24 @@ public class MergeService {
 
     private final Logger logger = LoggerFactory.getLogger(MergeService.class);
 
-    private final static String CONTEXT_REFIX = "http://code-research.eu/cubes/";
+    private final static String CONTEXT_REFIX = "http://code-research.eu/resource/cubes/";
     private final static String VERSION = "codeCube/1.1";
     private final static String RELATION = "Cube was merged with the CODE CubeMerger";
     private final static String SOURCE = "http://zaire.dimis.fim.uni-passau.de:8181/cube-merging/select";
     private final static String ENITIY_DEFINED_PREFIX = "http://code-research.eu/resource/";
+
+    private boolean cache = false;
+
+    public boolean isCache() {
+        return cache;
+    }
+
+    public void setCache(boolean cache) {
+        this.cache = cache;
+    }
+
+    private Map<String, StructureDefinition> structureDefinitionCache = new HashMap<String, StructureDefinition>();
+    private Map<String, DatasetDescription> datasetDescriptionCache = new HashMap<String, DatasetDescription>();
 
     @Autowired
     private MergeDao mergeDao;
@@ -345,7 +356,9 @@ public class MergeService {
             }
 
             for (String key : o.getMeasures().keySet()) {
-                resource.addLiteral(model.createProperty(key), o.getMeasures().get(key));
+                XSDDatatype xsdDatatype = XSDDatatype.XSDlong;
+                Literal literal = model.createTypedLiteral(o.getMeasures().get(key), xsdDatatype);
+                resource.addLiteral(model.createProperty(key), literal);
             }
 
             // create dataset link and type definition
@@ -558,28 +571,37 @@ public class MergeService {
     }
 
     public StructureDefinition getStructureDetails(String graph) {
-        Map<String, String> components = mergeDao.getComponents(graph);
-        List<String> dimensions = new LinkedList<String>();
-        List<String> measures = new LinkedList<String>();
+        StructureDefinition result = null;
 
-        StructureDefinition structureDefinition = new StructureDefinition();
-        for (String key : components.keySet()) {
-            String value = components.get(key);
+        if (cache && structureDefinitionCache.containsKey(graph)) {
+            result = structureDefinitionCache.get(graph);
+        } else {
+            Map<String, String> components = mergeDao.getComponents(graph);
+            List<String> dimensions = new LinkedList<String>();
+            List<String> measures = new LinkedList<String>();
 
-            if (value.equals(QB.DIMENSION.getURI())) {
-                dimensions.add(key);
-            } else if (value.equals(QB.MEASURE.getURI())) {
-                measures.add(key);
-            } else {
-                logger.warn("dataset is possible not valid due to unsupported component type: " + value + " Graph: " + graph);
-                //return structureDefinition;
+            StructureDefinition structureDefinition = new StructureDefinition();
+            for (String key : components.keySet()) {
+                String value = components.get(key);
+
+                if (value.equals(QB.DIMENSION.getURI())) {
+                    dimensions.add(key);
+                } else if (value.equals(QB.MEASURE.getURI())) {
+                    measures.add(key);
+                } else {
+                    logger.warn("dataset is possible not valid due to unsupported component type: " + value + " Graph: " + graph);
+                    //return structureDefinition;
+                }
+
+                structureDefinition.setDimensions(dimensions);
+                structureDefinition.setMeasures(measures);
+
+                structureDefinitionCache.put(graph, structureDefinition);
+                result = structureDefinition;
             }
         }
 
-        structureDefinition.setDimensions(dimensions);
-        structureDefinition.setMeasures(measures);
-
-        return structureDefinition;
+        return result;
     }
 
     public void addDimension(String graph, String label, String resource, String value) {
@@ -625,7 +647,17 @@ public class MergeService {
     }
 
     public DatasetDescription getDatasetDescription(String graph, String auth) {
-        return mergeDao.getDatasetFromUser(graph, auth);
+        DatasetDescription result;
+
+        if (cache && datasetDescriptionCache.containsKey(graph)) {
+            result = datasetDescriptionCache.get(graph);
+        } else {
+            DatasetDescription datasetDescription = mergeDao.getDatasetFromUser(graph, auth);
+            datasetDescriptionCache.put(graph, datasetDescription);
+            result = datasetDescription;
+        }
+
+        return result;
     }
 
 }

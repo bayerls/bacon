@@ -1,7 +1,9 @@
 package de.uop.code.cubemerging.action;
 
+import de.uop.code.cubemerging.service.ContentTypeRdf;
 import de.uop.code.cubemerging.service.MergeService;
 import de.uop.code.cubemerging.service.StoreService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,14 +19,14 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 @SessionAttributes({"mergeService"})
 public class FinalizeMerge {
 
+    @Autowired
+    private StoreService storeService;
+
     @RequestMapping(method = RequestMethod.GET)
     public String handleForm(@ModelAttribute(value = "mergeService") MergeService mergeService, Model model, String label, String description) {
         mergeService.createGenericMergedDataset(label, description);
-        StoreService storeService = new StoreService();
         String context = mergeService.generateContext();
-        storeService.storeDump(mergeService.getMergedDataset(), context);
-
-//        System.out.println(mergeService.getMergedDataset());
+        storeService.persist(mergeService.getMergedDataset(), ContentTypeRdf.N3, context);
 
         model.addAttribute("label", label);
         model.addAttribute("description", description);

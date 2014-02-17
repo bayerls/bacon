@@ -398,6 +398,9 @@ public class MergeDao {
             String obs = result.get("s").toString();
             String predicate = result.get("p").toString();
             String object = result.get("o").toString();
+            // TODO this is a hack to strip the datatype
+            object = object.replace("^^http://www.w3.org/2001/XMLSchema#long", "");
+
 
             if (!observations.containsKey(obs)) {
                 observations.put(obs, new Observation());

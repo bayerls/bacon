@@ -8,49 +8,50 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class StoreService {
 
-    private final Logger logger = LoggerFactory.getLogger(StoreService.class);
+    private final static String CONTEXT_URI = "?context-uri=";
 
-    public String storeDump(String content, String context) {
-        String result = "error occured";
-
+    public String persist(String content, ContentTypeRdf contentType, String context) {
+        //System.out.println(content);
         HttpClient httpClient = HttpClients.createDefault();
-        HttpPost httpPost = new HttpPost(Properties.getInstance().getStoreageServiceProvider());
 
-        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-        nvps.add(new BasicNameValuePair("content", content));
-        nvps.add(new BasicNameValuePair("context", context));
+
+        HttpPost httpPost = new HttpPost(Properties.getInstance().getStoreageServiceProvider() + CONTEXT_URI + context);
+
+        httpPost.setHeader("Content-Type", contentType.getContentTypeRdf());
 
         try {
-            httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+            httpPost.setEntity(new StringEntity(content));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
+        HttpResponse response = null;
+        String result = "";
         try {
-            HttpResponse response = httpClient.execute(httpPost);
-            try {
-                logger.info(response.getStatusLine().toString());
-                HttpEntity entity = response.getEntity();
-                result = IOUtils.toString(entity.getContent(), "UTF-8");
-                EntityUtils.consume(entity);
-            } finally {
-                httpPost.releaseConnection();
-            }
+            response = httpClient.execute(httpPost);
+            HttpEntity entity = response.getEntity();
+            result = IOUtils.toString(entity.getContent(), "UTF-8");
+            EntityUtils.consume(entity);
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            httpPost.releaseConnection();
         }
 
         return result;
