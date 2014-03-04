@@ -27,9 +27,6 @@ public class Merge {
                              @RequestParam String g2,
                              @RequestParam String auth) {
 
-
-        //model.addAttribute("cubeInfo", mergeService.getCubeInfo(g1, auth));
-
         mergeService.setAuth(auth);
         model.addAttribute("mergeService", mergeService);
         model.addAttribute("mergedDSD", mergeService.getMergedDSD(g1, g2));
