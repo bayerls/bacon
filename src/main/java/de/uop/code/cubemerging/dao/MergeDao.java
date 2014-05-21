@@ -400,6 +400,7 @@ public class MergeDao {
             String object = result.get("o").toString();
             // TODO this is a hack to strip the datatype
             object = object.replace("^^http://www.w3.org/2001/XMLSchema#long", "");
+            object = object.replace("^^http://www.w3.org/2001/XMLSchema#double", "");
 
 
             if (!observations.containsKey(obs)) {

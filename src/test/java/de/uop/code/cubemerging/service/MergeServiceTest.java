@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -37,13 +38,11 @@ public class MergeServiceTest {
 
     @Test
     public void testMerge() throws Exception {
-        String graph = "http://code-research.eu/resource/cube/52ba8242-ebc6-4bce-9e74-9c7f93fa7691";
+        String graph = "http://code-research.eu/resource/cube/f3e32e5e-603d-47c9-997e-91bac6d7c849";
         String auth = "8023903";
         mergeService.setAuth(auth);
 
-
         List<RankItem> suggestions = suggestionService.getSuggestionList(graph, auth, CompareAlgorithm.FULL_STRUCTURE);
-
         List<RankItem> matchingItems = new ArrayList<RankItem>();
 
         for (RankItem rankItem : suggestions) {
@@ -61,24 +60,27 @@ public class MergeServiceTest {
         List<String> contextList = new ArrayList<String>();
         Stopwatch stopwatch = Stopwatch.createStarted();
 
+        int i = 0;
         for (RankItem rankItem : matchingItems) {
             description += rankItem.getDatasetDescription().getLabel() + "  +  ";
             mergeService.getMergedDSD(currentMergedGraph, rankItem.getDatasetDescription().getNamedGraph());
             mergeService.createGenericMergedDataset(label, description);
 
-
             currentMergedGraph = mergeService.generateContext();
             contextList.add(currentMergedGraph);
             storeService.persist(mergeService.getMergedDataset(), ContentTypeRdf.N3, currentMergedGraph);
+
+            String id = currentMergedGraph.replace(MergeService.CONTEXT_REFIX, "");
+
+            PrintWriter writer = new PrintWriter("/Users/Basti/Desktop/dump/" + i + "-" + id + ".n3", "UTF-8");
+            writer.println(mergeService.getMergedDataset());
+            writer.close();
+
+            System.out.println("---");
+            System.out.println(currentMergedGraph);
             System.out.println(mergeService.getLog().getObsC1() + mergeService.getLog().getObsC2() - mergeService.getLog().getObsMerged() + ", " + stopwatch.elapsed(TimeUnit.SECONDS));
-        }
 
-
-
-
-        // total 41776
-
-
+            i++;
 
         // TODO write asserts for the contextList
 

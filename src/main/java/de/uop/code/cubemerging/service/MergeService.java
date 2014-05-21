@@ -28,7 +28,7 @@ public class MergeService {
 
     private final Logger logger = LoggerFactory.getLogger(MergeService.class);
 
-    private final static String CONTEXT_REFIX = "http://code-research.eu/resource/cubes/";
+    public final static String CONTEXT_REFIX = "http://code-research.eu/resource/cube/";
     private final static String VERSION = "codeCube/1.1";
     private final static String RELATION = "Cube was merged with the CODE CubeMerger";
     private final static String SOURCE = "http://zaire.dimis.fim.uni-passau.de:8181/cube-merging/select";
@@ -181,7 +181,7 @@ public class MergeService {
             Resource res = mergedDataset.createResource(ed.getResource());
             res.addLiteral(RDFS.label, ed.getLabel());
             res.addProperty(RDFS.isDefinedBy, mergedDataset.createResource(ed.getDefinedBy()));
-            res.addProperty(RDF.type, CODE.ENTITY);
+            res.addProperty(RDF.type, mergedDataset.createResource(CODE.ENTITY));
         }
 
         EntityDefinitionWrapper edw = new EntityDefinitionWrapper();
@@ -356,7 +356,7 @@ public class MergeService {
             }
 
             for (String key : o.getMeasures().keySet()) {
-                XSDDatatype xsdDatatype = XSDDatatype.XSDlong;
+                XSDDatatype xsdDatatype = XSDDatatype.XSDdouble;
                 Literal literal = model.createTypedLiteral(o.getMeasures().get(key), xsdDatatype);
                 resource.addLiteral(model.createProperty(key), literal);
             }
